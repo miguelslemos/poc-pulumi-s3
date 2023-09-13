@@ -1,0 +1,4 @@
+encryptionsalt: v1:JMNh54KSv7c=:v1:1kIgTkTUkxvko8GV:VVx+GDwTf9iTrtq2VJ7F2/Sd/+CZMg==
+config:
+  aws-native:region: us-east-1
+  aws:profile: dev-prod
