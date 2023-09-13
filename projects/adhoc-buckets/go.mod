@@ -3,7 +3,7 @@ module github.com/miguelslemos/pulumi-nu-packages/projects/adhoc-buckets
 go 1.21
 
 require (
-	github.com/miguelslemos/pulumi-nu-packages/sdk v0.0.2
+	github.com/miguelslemos/pulumi-nu-packages/sdk v0.0.3
 	github.com/pulumi/pulumi/sdk/v3 v3.82.1
 )
 
