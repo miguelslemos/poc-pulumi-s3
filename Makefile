@@ -18,7 +18,6 @@ build:: build_provider
 
 install:: install_provider
 
-
 # Provider
 
 build_provider::
@@ -36,6 +35,7 @@ gen_go_sdk::
 	rm -rf sdk/go
 	cd provider/cmd/${CODEGEN} && go run . go ../../../sdk/go ${SCHEMA_PATH}
 
+build_go_sdk:: gen_go_sdk
 
 # .NET SDK
 

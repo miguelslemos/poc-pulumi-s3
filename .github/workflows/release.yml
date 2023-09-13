@@ -4,6 +4,10 @@ on:
     tags:
       - v*.*.*
       - '!v*.*.*-**'
+
+permissions:
+  contents: write
+
 env:
   # THIS GITHUB_TOKEN IS A REQUIREMENT TO BE ABLE TO WRITE TO GH RELEASES
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -49,7 +53,7 @@ jobs:
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v2
       with:
-        args: -p 3 release --rm-dist
+        args: -p 3 release --clean
         version: latest
     strategy:
       fail-fast: true
@@ -104,7 +108,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.language  }}-sdk.tar.gz
+          name: ${{ matrix.language }}-sdk.tar.gz
           path: ${{ github.workspace}}/sdk/${{ matrix.language }}.tar.gz
       # - if: ${{ matrix.language == 'python' && env.PUBLISH_PYPI == 'true' }}
       #   name: Publish package to PyPI
