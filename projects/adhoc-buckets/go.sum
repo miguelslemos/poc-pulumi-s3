@@ -118,8 +118,8 @@ github.com/mattn/go-runewidth v0.0.4/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzp
 github.com/mattn/go-runewidth v0.0.12/go.mod h1:RAqKPSqVFrSLVXbA8x7dzmKdmGzieGRCM46jaSJTDAk=
 github.com/mattn/go-runewidth v0.0.15 h1:UNAjwbU9l54TA3KzvqLGxwWjHmMgBUVhBiTjelZgg3U=
 github.com/mattn/go-runewidth v0.0.15/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
-github.com/miguelslemos/pulumi-nu-packages/sdk v0.0.1 h1:2g5fQ5li0WazZq0nbZyNuXNc0xSVr3kV+wkOvncI3Xo=
-github.com/miguelslemos/pulumi-nu-packages/sdk v0.0.1/go.mod h1:oGlVJ5rxpM/ycAL2Asr0WYARDehM+Jk4r9zD1JsEIuY=
+github.com/miguelslemos/pulumi-nu-packages/sdk v0.0.2 h1:KHbYs7nqx2hi+ixu4JCUdE427FRiDLvg0vrO66uVeB0=
+github.com/miguelslemos/pulumi-nu-packages/sdk v0.0.2/go.mod h1:oGlVJ5rxpM/ycAL2Asr0WYARDehM+Jk4r9zD1JsEIuY=
 github.com/mitchellh/go-ps v1.0.0 h1:i6ampVEEF4wQFF+bkYfwYgY+F/uYJDktmvLPf7qIgjc=
 github.com/mitchellh/go-ps v1.0.0/go.mod h1:J4lOc8z8yJs6vUwklHw2XEIiT4z4C40KtWVN3nvg8Pg=
 github.com/mitchellh/go-wordwrap v1.0.1 h1:TLuKupo69TCn6TQSyGxwI1EblZZEsQ0vMlAFQflz0v0=

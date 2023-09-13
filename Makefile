@@ -1,7 +1,7 @@
-VERSION         := 0.0.2
+VERSION         := 0.0.3
 
 PACK            := nu-packages
-PROJECT         := github.com/pulumi/pulumi-${PACK}
+PROJECT         := github.com/miguelslemos/pulumi-${PACK}
 
 PROVIDER        := pulumi-resource-${PACK}
 CODEGEN         := pulumi-gen-${PACK}
