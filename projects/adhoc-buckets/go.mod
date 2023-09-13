@@ -2,9 +2,10 @@ module github.com/miguelslemos/pulumi-nu-packages/projects/adhoc-buckets
 
 go 1.21
 
-require github.com/pulumi/pulumi/sdk/v3 v3.82.1
-
-replace github.com/miguelslemos/pulumi-nu-packages/sdk => ../../sdk
+require (
+github.com/pulumi/pulumi/sdk/v3 v3.82.1
+github.com/miguelslemos/pulumi-nu-packages/sdk v0.0.1
+)
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
