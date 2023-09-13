@@ -41,5 +41,8 @@ Temporary Items
 .pulumi/
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,pulumi
-
+# Ignore pulumi binary
 /bin/
+
+# Ignore pulumi schema
+/provider/cmd/pulumi-resource-nu-packages/schema.go
