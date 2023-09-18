@@ -1,7 +1,9 @@
 go 1.21
 
 use (
-    ./sdk
-    ./provider
-    ./projects/adhoc-buckets
+	./projects/add-bucket-policy
+	./projects/adhoc-buckets
+	./projects/create-bucket
+	./provider
+	./sdk
 )

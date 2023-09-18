@@ -1,0 +1,4 @@
+encryptionsalt: v1:t7/jw9Qonyc=:v1:meF7Xbq75KOZnKdr:g4o/y+mX4tuAq6wp0AH9fuQsQrOz5Q==
+config:
+  aws-native:region: us-east-1
+  bucket-name: "my-local-bucket-pulumi"
