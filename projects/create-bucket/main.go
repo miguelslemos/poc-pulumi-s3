@@ -16,7 +16,6 @@ func main() {
 		}
 
 		// Export the name of the bucket
-		ctx.Export("bucketNameID", bucket.ID())
 		ctx.Export("bucketArn", bucket.Arn)
 		ctx.Export("bucketName", bucket.BucketName)
 		return nil
