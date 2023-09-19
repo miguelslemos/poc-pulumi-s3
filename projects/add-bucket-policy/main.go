@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/pulumi/pulumi-aws-native/sdk/go/aws/s3"
+	"github.com/pulumi/pulumi-aws-native/sdk/go/aws/s3outposts"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
@@ -10,7 +10,7 @@ func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
 		conf := config.New(ctx, "")
 		bucketName := conf.Require("bucket-name")
-		if _, err := s3.NewBucketPolicy(ctx, "bucketPolicy", &s3.BucketPolicyArgs{
+		if _, err := s3outposts.NewBucketPolicy(ctx, "bucketPolicy", &s3outposts.BucketPolicyArgs{
 			Bucket: pulumi.String(bucketName),
 			PolicyDocument: pulumi.Any(map[string]interface{}{
 				"Version": "2012-10-17",
