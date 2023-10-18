@@ -4,6 +4,7 @@ use (
 	./projects/add-bucket-policy
 	./projects/adhoc-buckets
 	./projects/create-bucket
+	./projects/nu-cloudfront
 	./provider
 	./sdk
 )
