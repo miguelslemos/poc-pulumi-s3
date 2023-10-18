@@ -32,6 +32,5 @@ config:
       NU_SQUAD: infra4infra
       IAC_TOOL: pulumi
     viewerCertificate:
-      acmCertificateArn: arn:aws:acm:us-east-1:307096125112:certificate/d0bf4a2e-a3e7-433a-8e50-ca4d59dc86a3
       minimumProtocolVersion: TLSv1.2_2021
       sslSupportMethod: sni-only
