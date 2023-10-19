@@ -10,7 +10,6 @@ config:
     origins:
       - domainName: poc-cloudfront-static-4213.s3-website-us-east-1.amazonaws.com
         originId: poc-cloudfront-static-4213.s3-website-us-east-1.amazonaws.com
-        customOriginConfig: []
     defaultCacheBehavior:
       allowedMethods:
         - GET
@@ -26,7 +25,6 @@ config:
     isIpv6Enabled: true
     restrictions:
       geoRestriction:
-        locations: []
         restrictionType: none
     tags:
       NU_SQUAD: infra4infra

@@ -11,25 +11,121 @@ import (
 
 type NuDistributionArgs struct {
 	Aliases                      []string
-	Comment                      string
-	ContinuousDeploymentPolicyId string
+	Comment                      *string
+	ContinuousDeploymentPolicyId *string
 	CustomErrorResponses         []cloudfront.DistributionCustomErrorResponse
 	DefaultCacheBehavior         cloudfront.DistributionDefaultCacheBehavior   `pulumi:"defaultCacheBehavior"`
-	DefaultRootObject            string                                        `pulumi:"defaultRootObject"`
+	DefaultRootObject            *string                                       `pulumi:"defaultRootObject"`
 	Enabled                      bool                                          `pulumi:"enabled"`
-	HttpVersion                  string                                        `pulumi:"httpVersion"`
-	IsIpv6Enabled                bool                                          `pulumi:"isIpv6Enabled"`
-	LoggingConfig                cloudfront.DistributionLoggingConfig          `pulumi:"loggingConfig"`
+	HttpVersion                  *string                                       `pulumi:"httpVersion"`
+	IsIpv6Enabled                *bool                                         `pulumi:"isIpv6Enabled"`
+	LoggingConfig                *cloudfront.DistributionLoggingConfig         `pulumi:"loggingConfig"`
 	OrderedCacheBehaviors        []cloudfront.DistributionOrderedCacheBehavior `pulumi:"orderedCacheBehaviors"`
 	OriginGroups                 []cloudfront.DistributionOriginGroup          `pulumi:"originGroups"`
 	Origins                      []cloudfront.DistributionOrigin               `pulumi:"origins"`
-	PriceClass                   string                                        `pulumi:"priceClass"`
+	PriceClass                   *string                                       `pulumi:"priceClass"`
 	Restrictions                 cloudfront.DistributionRestrictions
-	Staging                      bool              `pulumi:"staging"`
+	Staging                      *bool             `pulumi:"staging"`
 	Tags                         map[string]string `pulumi:"tags"`
 	ViewerCertificate            cloudfront.DistributionViewerCertificate
-	WaitForDeployment            bool   `pulumi:"waitForDeployment"`
-	WebAclId                     string `pulumi:"webAclId"`
+	WaitForDeployment            *bool   `pulumi:"waitForDeployment"`
+	WebAclId                     *string `pulumi:"webAclId"`
+}
+
+func toDistributionOrderedCacheBehavior(a []cloudfront.DistributionOrderedCacheBehavior) cloudfront.DistributionOrderedCacheBehaviorArrayInput {
+	var res []cloudfront.DistributionOrderedCacheBehaviorInput
+	for _, s := range a {
+		res = append(res, cloudfront.DistributionOrderedCacheBehaviorArgs{
+			AllowedMethods: pulumi.ToStringArray(s.AllowedMethods),
+			CachedMethods:  pulumi.ToStringArray(s.CachedMethods),
+			Compress:       pulumi.BoolPtrFromPtr(s.Compress),
+			DefaultTtl:     pulumi.IntPtrFromPtr(s.DefaultTtl),
+			ForwardedValues: cloudfront.DistributionOrderedCacheBehaviorForwardedValuesArgs{
+				Cookies: cloudfront.DistributionOrderedCacheBehaviorForwardedValuesCookiesArgs{
+					Forward: pulumi.String(s.ForwardedValues.Cookies.Forward),
+				},
+				QueryString: pulumi.Bool(s.ForwardedValues.QueryString),
+				Headers:     pulumi.ToStringArray(s.ForwardedValues.Headers),
+			},
+		})
+	}
+	return cloudfront.DistributionOrderedCacheBehaviorArray(res)
+}
+
+func toDistributionOriginGroupMember(a []cloudfront.DistributionOriginGroupMember) cloudfront.DistributionOriginGroupMemberArrayInput {
+	var res []cloudfront.DistributionOriginGroupMemberInput
+	for _, s := range a {
+		res = append(res, cloudfront.DistributionOriginGroupMemberArgs{
+			OriginId: pulumi.String(s.OriginId),
+		})
+	}
+	return cloudfront.DistributionOriginGroupMemberArray(res)
+}
+func toDistributionOriginGroup(a []cloudfront.DistributionOriginGroup) cloudfront.DistributionOriginGroupArrayInput {
+	var res []cloudfront.DistributionOriginGroupInput
+	for _, s := range a {
+		res = append(res, cloudfront.DistributionOriginGroupArgs{
+			OriginId: pulumi.String(s.OriginId),
+			FailoverCriteria: cloudfront.DistributionOriginGroupFailoverCriteriaArgs{
+				StatusCodes: pulumi.ToIntArray(s.FailoverCriteria.StatusCodes),
+			},
+			Members: toDistributionOriginGroupMember(s.Members),
+		})
+	}
+	return cloudfront.DistributionOriginGroupArray(res)
+}
+
+// func toDistributionOriginCustomHeader(a []cloudfront.DistributionOriginCustomHeader) cloudfront.DistributionOriginCustomHeaderArrayInput {
+// 	var res []cloudfront.DistributionOriginCustomHeaderInput
+// 	for _, s := range a {
+// 		res = append(res, cloudfront.DistributionOriginCustomHeaderArgs{
+// 			Name:  pulumi.String(s.Name),
+// 			Value: pulumi.String(s.Value),
+// 		})
+// 	}
+// 	return cloudfront.DistributionOriginCustomHeaderArray(res)
+// }
+
+// func toDistributionOriginArray(a []cloudfront.DistributionOrigin) cloudfront.DistributionOriginArrayInput {
+// 	var res []cloudfront.DistributionOriginInput
+// 	for _, s := range a {
+// 		res = append(res, cloudfront.DistributionOriginArgs{
+// 			DomainName: pulumi.String(s.DomainName),
+// 			OriginId:   pulumi.String(s.OriginId),
+// 			CustomOriginConfig: cloudfront.DistributionOriginCustomOriginConfigArgs{
+// 				HttpPort:             pulumi.Int(s.CustomOriginConfig.HttpPort),
+// 				HttpsPort:            pulumi.Int(s.CustomOriginConfig.HttpsPort),
+// 				OriginProtocolPolicy: pulumi.String(s.CustomOriginConfig.OriginProtocolPolicy),
+// 				OriginSslProtocols:   pulumi.ToStringArray(s.CustomOriginConfig.OriginSslProtocols),
+// 			},
+// 			ConnectionAttempts:    pulumi.IntPtrFromPtr(s.ConnectionAttempts),
+// 			ConnectionTimeout:     pulumi.IntPtrFromPtr(s.ConnectionTimeout),
+// 			OriginPath:            pulumi.StringPtrFromPtr(s.OriginPath),
+// 			OriginAccessControlId: pulumi.StringPtrFromPtr(s.OriginAccessControlId),
+// 			OriginShield: cloudfront.DistributionOriginOriginShieldArgs{
+// 				Enabled:            pulumi.Bool(s.OriginShield.Enabled),
+// 				OriginShieldRegion: pulumi.StringPtrFromPtr(s.OriginShield.OriginShieldRegion),
+// 			},
+// 			S3OriginConfig: cloudfront.DistributionOriginS3OriginConfigArgs{
+// 				OriginAccessIdentity: pulumi.String(s.S3OriginConfig.OriginAccessIdentity),
+// 			},
+// 			CustomHeaders: toDistributionOriginCustomHeader(s.CustomHeaders),
+// 		})
+// 	}
+// 	return cloudfront.DistributionOriginArray(res)
+// }
+
+func toDistributionCustomErrorResponse(a []cloudfront.DistributionCustomErrorResponse) cloudfront.DistributionCustomErrorResponseArrayInput {
+	var res []cloudfront.DistributionCustomErrorResponseInput
+	for _, s := range a {
+		res = append(res, cloudfront.DistributionCustomErrorResponseArgs{
+			ErrorCode:          pulumi.Int(s.ErrorCode),
+			ErrorCachingMinTtl: pulumi.IntPtrFromPtr(s.ErrorCachingMinTtl),
+			ResponseCode:       pulumi.IntPtrFromPtr(s.ResponseCode),
+			ResponsePagePath:   pulumi.StringPtrFromPtr(s.ResponsePagePath),
+		})
+	}
+	return cloudfront.DistributionCustomErrorResponseArray(res)
 }
 
 func main() {
@@ -90,38 +186,50 @@ func main() {
 		// Create a cloudfront distribution to serve the content from the bucket.
 		distribution, err := cloudfront.NewDistribution(ctx, "distribution", &cloudfront.DistributionArgs{
 			Aliases: pulumi.ToStringArray(distributionArgs.Aliases),
-			Comment: pulumi.StringPtr(distributionArgs.Comment),
-			Origins: cloudfront.DistributionOriginArray{
-				cloudfront.DistributionOriginArgs{
-					DomainName: pulumi.String("poc-cloudfront-static-4213.s3-website-us-east-1.amazonaws.com"),
-					OriginId:   pulumi.String("poc-cloudfront-static-4213.s3-website-us-east-1.amazonaws.com"),
+			Comment: pulumi.StringPtrFromPtr(distributionArgs.Comment),
+			// Origins: toDistributionOriginArray(distributionArgs.Origins),
+			DefaultCacheBehavior: cloudfront.DistributionDefaultCacheBehaviorArgs{
+				AllowedMethods: pulumi.ToStringArray(distributionArgs.DefaultCacheBehavior.AllowedMethods),
+				CachedMethods:  pulumi.ToStringArray(distributionArgs.DefaultCacheBehavior.CachedMethods),
+				Compress:       pulumi.BoolPtrFromPtr(distributionArgs.DefaultCacheBehavior.Compress),
+				DefaultTtl:     pulumi.IntPtrFromPtr(distributionArgs.DefaultCacheBehavior.DefaultTtl),
+				ForwardedValues: cloudfront.DistributionDefaultCacheBehaviorForwardedValuesArgs{
+					Cookies: cloudfront.DistributionDefaultCacheBehaviorForwardedValuesCookiesArgs{
+						Forward: pulumi.String(distributionArgs.DefaultCacheBehavior.ForwardedValues.Cookies.Forward),
+					},
+					QueryString: pulumi.Bool(distributionArgs.DefaultCacheBehavior.ForwardedValues.QueryString),
+					Headers:     pulumi.ToStringArray(distributionArgs.DefaultCacheBehavior.ForwardedValues.Headers),
 				},
 			},
-			DefaultCacheBehavior:         distributionArgs.DefaultCacheBehavior,
-			ContinuousDeploymentPolicyId: pulumi.StringPtr(distributionArgs.ContinuousDeploymentPolicyId),
-			CustomErrorResponses:         distributionArgs.CustomErrorResponses,
-			DefaultRootObject:            pulumi.StringPtr(distributionArgs.DefaultRootObject),
+			OriginGroups:                 toDistributionOriginGroup(distributionArgs.OriginGroups),
+			ContinuousDeploymentPolicyId: pulumi.StringPtrFromPtr(distributionArgs.ContinuousDeploymentPolicyId),
+			CustomErrorResponses:         toDistributionCustomErrorResponse(distributionArgs.CustomErrorResponses),
+			DefaultRootObject:            pulumi.StringPtrFromPtr(distributionArgs.DefaultRootObject),
 			Enabled:                      pulumi.Bool(distributionArgs.Enabled),
-			HttpVersion:                  pulumi.StringPtr(distributionArgs.HttpVersion),
-			IsIpv6Enabled:                pulumi.BoolPtr(distributionArgs.IsIpv6Enabled),
-			LoggingConfig:                distributionArgs.LoggingConfig,
-			OrderedCacheBehaviors:        distributionArgs.OrderedCacheBehaviors,
-			PriceClass:                   pulumi.StringPtr(distributionArgs.PriceClass),
+			HttpVersion:                  pulumi.StringPtrFromPtr(distributionArgs.HttpVersion),
+			IsIpv6Enabled:                pulumi.BoolPtrFromPtr(distributionArgs.IsIpv6Enabled),
+			LoggingConfig: cloudfront.DistributionLoggingConfigPtr(&cloudfront.DistributionLoggingConfigArgs{
+				Bucket:         pulumi.String(distributionArgs.LoggingConfig.Bucket),
+				IncludeCookies: pulumi.BoolPtrFromPtr(distributionArgs.LoggingConfig.IncludeCookies),
+				Prefix:         pulumi.StringPtrFromPtr(distributionArgs.LoggingConfig.Prefix),
+			}),
+			OrderedCacheBehaviors: toDistributionOrderedCacheBehavior(distributionArgs.OrderedCacheBehaviors),
+			PriceClass:            pulumi.StringPtrFromPtr(distributionArgs.PriceClass),
 			Restrictions: cloudfront.DistributionRestrictionsArgs{
 				GeoRestriction: cloudfront.DistributionRestrictionsGeoRestrictionArgs{
 					Locations:       pulumi.ToStringArray(distributionArgs.Restrictions.GeoRestriction.Locations),
 					RestrictionType: pulumi.String(distributionArgs.Restrictions.GeoRestriction.RestrictionType),
 				},
 			},
-			Staging: pulumi.BoolPtr(distributionArgs.Staging),
+			Staging: pulumi.BoolPtrFromPtr(distributionArgs.Staging),
 			Tags:    pulumi.ToStringMap(distributionArgs.Tags),
 			ViewerCertificate: cloudfront.DistributionViewerCertificateArgs{
-				AcmCertificateArn:      pulumi.StringPtr(*distributionArgs.ViewerCertificate.AcmCertificateArn),
-				MinimumProtocolVersion: pulumi.StringPtr(*distributionArgs.ViewerCertificate.MinimumProtocolVersion),
-				SslSupportMethod:       pulumi.StringPtr(*distributionArgs.ViewerCertificate.SslSupportMethod),
+				AcmCertificateArn:      pulumi.StringPtrFromPtr(distributionArgs.ViewerCertificate.AcmCertificateArn),
+				MinimumProtocolVersion: pulumi.StringPtrFromPtr(distributionArgs.ViewerCertificate.MinimumProtocolVersion),
+				SslSupportMethod:       pulumi.StringPtrFromPtr(distributionArgs.ViewerCertificate.SslSupportMethod),
 			},
-			WaitForDeployment: pulumi.BoolPtr(distributionArgs.WaitForDeployment),
-			WebAclId:          pulumi.StringPtr(distributionArgs.WebAclId),
+			WaitForDeployment: pulumi.BoolPtrFromPtr(distributionArgs.WaitForDeployment),
+			WebAclId:          pulumi.StringPtrFromPtr(distributionArgs.WebAclId),
 		})
 		if err != nil {
 			return err
