@@ -31,9 +31,10 @@ type NuDistributionArgs struct {
 	ViewerCertificate            cloudfront.DistributionViewerCertificate
 	WaitForDeployment            *bool   `pulumi:"waitForDeployment"`
 	WebAclId                     *string `pulumi:"webAclId"`
+	DistributionArgs             cloudfront.DistributionArgs
 }
 
-func DistributionConfig(ctx *pulumi.Context) cloudfront.DistributionArgs {
+func CreateDistributionConfig(ctx *pulumi.Context) NuDistributionArgs {
 	var distributionArgs NuDistributionArgs
 	config.RequireObject(ctx, Distribution, &distributionArgs)
 
@@ -63,7 +64,9 @@ func DistributionConfig(ctx *pulumi.Context) cloudfront.DistributionArgs {
 	setOriginGroups(&dist, distributionArgs.OriginGroups)
 	setOrderedCacheBehaviors(&dist, distributionArgs.OrderedCacheBehaviors)
 
-	return dist
+	distributionArgs.DistributionArgs = dist
+
+	return distributionArgs
 }
 
 func setAliases(dist *cloudfront.DistributionArgs, aliases []string) {
@@ -86,7 +89,7 @@ func setLoggingConfig(dist *cloudfront.DistributionArgs, loggingConfig *cloudfro
 func setDefaultCacheBehavior(dist *cloudfront.DistributionArgs, defaultCacheBehavior cloudfront.DistributionDefaultCacheBehavior) {
 	cacheBehavior := cloudfront.DistributionDefaultCacheBehaviorArgs{
 		ViewerProtocolPolicy: pulumi.String(defaultCacheBehavior.ViewerProtocolPolicy),
-		TargetOriginId:       pulumi.String(defaultCacheBehavior.TargetOriginId),
+		TargetOriginId:       pulumi.String("bucket-origin"),
 	}
 	setStringArrayFrom(&cacheBehavior.AllowedMethods, defaultCacheBehavior.AllowedMethods)
 	setStringArrayFrom(&cacheBehavior.CachedMethods, defaultCacheBehavior.CachedMethods)
@@ -169,8 +172,10 @@ func setOrigins(dist *cloudfront.DistributionArgs, origins []cloudfront.Distribu
 	for i, origin := range origins {
 		originArgs := cloudfront.DistributionOriginArgs{
 			DomainName: pulumi.String(origin.DomainName),
-			OriginId:   pulumi.String(origin.OriginId),
+			OriginId:   pulumi.String("bucket-origin"),
 		}
+		setStringPtrFromPtr(&originArgs.OriginAccessControlId, origin.OriginAccessControlId)
+		setStringPtrFromPtr(&originArgs.OriginPath, origin.OriginPath)
 
 		if origin.CustomOriginConfig != nil {
 			config := cloudfront.DistributionOriginCustomOriginConfigArgs{
@@ -184,12 +189,12 @@ func setOrigins(dist *cloudfront.DistributionArgs, origins []cloudfront.Distribu
 			originArgs.CustomOriginConfig = cloudfront.DistributionOriginCustomOriginConfigPtr(&config)
 		}
 
-		if origin.S3OriginConfig != nil {
-			config := cloudfront.DistributionOriginS3OriginConfigArgs{
-				OriginAccessIdentity: pulumi.String(origin.S3OriginConfig.OriginAccessIdentity),
-			}
-			originArgs.S3OriginConfig = cloudfront.DistributionOriginS3OriginConfigPtr(&config)
-		}
+		// if origin.S3OriginConfig != nil {
+		// 	config := cloudfront.DistributionOriginS3OriginConfigArgs{
+		// 		OriginAccessIdentity: pulumi.String(origin.S3OriginConfig.OriginAccessIdentity),
+		// 	}
+		// 	originArgs.S3OriginConfig = cloudfront.DistributionOriginS3OriginConfigPtr(&config)
+		// }
 
 		originArray[i] = originArgs
 	}

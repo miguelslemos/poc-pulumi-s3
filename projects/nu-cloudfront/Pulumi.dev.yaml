@@ -7,9 +7,7 @@ config:
     aliases:
       - poc-cloudfront-static-4213.nubankdev.com
     comment: POC CloudFront Pulumi
-    origins:
-      - domainName: poc-cloudfront-static-4213.s3-website-us-east-1.amazonaws.com
-        originId: poc-cloudfront-static-4213.s3-website-us-east-1.amazonaws.com
+    defaultRootObject: index.html
     defaultCacheBehavior:
       allowedMethods:
         - GET
@@ -17,11 +15,10 @@ config:
       cachedMethods:
         - GET
         - HEAD
-      targetOriginId: poc-cloudfront-static-4213.s3-website-us-east-1.amazonaws.com
       cachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
       viewerProtocolPolicy: redirect-to-https
       compress: true
-    enabled: false
+    enabled: true
     isIpv6Enabled: true
     restrictions:
       geoRestriction:
@@ -32,3 +29,5 @@ config:
     viewerCertificate:
       minimumProtocolVersion: TLSv1.2_2021
       sslSupportMethod: sni-only
+      acmCertificateArn: TODO
+
