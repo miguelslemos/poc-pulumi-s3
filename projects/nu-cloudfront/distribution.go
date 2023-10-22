@@ -4,20 +4,45 @@ import (
 	"fmt"
 
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cloudfront"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/s3"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 type CreateDistributionArgs struct {
-	BucketName               string
-	BucketRegionalDomainName pulumi.StringInput
-	DistributionConfig       NuDistributionArgs
+	BucketName string
+	Bucket     *s3.BucketV2
 }
 
 func CreateDistribution(ctx *pulumi.Context, prefix string, args *CreateDistributionArgs) (*cloudfront.Distribution, error) {
 
-	// Generate OriginAccessControl to access the private s3 bucket.
+	oac, err := createOriginAccessControl(ctx, prefix, args)
+	if err != nil {
+		return nil, err
+	}
+
+	bucketOrigin := []cloudfront.DistributionOriginInput{
+		cloudfront.DistributionOriginArgs{
+			DomainName:            BuildBucketRegionalDomainName(args.Bucket.Bucket, args.Bucket.Region),
+			OriginId:              pulumi.Sprintf("%s-origin", args.BucketName),
+			OriginAccessControlId: oac.ID(),
+		},
+	}
+
+	// Load Distribution config
+	var distConfig = CreateDistributionConfig(ctx, bucketOrigin)
+
+	// Create a cloudfront distribution to serve the content from the bucket.
+	distribution, err := cloudfront.NewDistribution(ctx, fmt.Sprintf("%s-distribution-%s", prefix, args.BucketName), &distConfig.DistributionArgs, pulumi.DependsOn([]pulumi.Resource{oac}))
+	if err != nil {
+		return nil, err
+	}
+	return distribution, nil
+}
+
+// Generate OriginAccessControl to access the private s3 bucket.
+func createOriginAccessControl(ctx *pulumi.Context, prefix string, args *CreateDistributionArgs) (*cloudfront.OriginAccessControl, error) {
 	oac, err := cloudfront.NewOriginAccessControl(ctx, fmt.Sprintf("%s-oac-%s", prefix, args.BucketName), &cloudfront.OriginAccessControlArgs{
-		Description:                   pulumi.String(fmt.Sprintf("Origin access control for %s", args.BucketName)),
+		Description:                   pulumi.Sprintf("Origin access control for %s", args.BucketName),
 		OriginAccessControlOriginType: pulumi.String("s3"),
 		SigningBehavior:               pulumi.String("always"),
 		SigningProtocol:               pulumi.String("sigv4"),
@@ -25,20 +50,5 @@ func CreateDistribution(ctx *pulumi.Context, prefix string, args *CreateDistribu
 	if err != nil {
 		return nil, err
 	}
-
-	// Override config to use the information from the bucket.
-	args.DistributionConfig.DistributionArgs.Origins = cloudfront.DistributionOriginArray([]cloudfront.DistributionOriginInput{
-		cloudfront.DistributionOriginArgs{
-			DomainName: pulumi.String("poc-cloudfront-static-4213.s3.us-east-1.amazonaws.com"),
-			// DomainName:            args.BucketRegionalDomainName,
-			OriginId:              pulumi.String("bucket-origin"),
-			OriginAccessControlId: oac.ID(),
-		},
-	})
-
-	distribution, err := cloudfront.NewDistribution(ctx, fmt.Sprintf("%s-distribution-%s", prefix, args.BucketName), &args.DistributionConfig.DistributionArgs, pulumi.DependsOn([]pulumi.Resource{oac}))
-	if err != nil {
-		return nil, err
-	}
-	return distribution, nil
+	return oac, nil
 }

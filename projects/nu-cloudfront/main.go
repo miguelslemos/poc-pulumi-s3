@@ -9,6 +9,10 @@ func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
 		config := config.New(ctx, "")
 		bucketName := config.Require("bucketName")
+		var domains []string
+		if err := config.TryObject("domains", &domains); err != nil {
+			return err
+		}
 
 		bucketContent, err := LookupBucket(ctx, bucketName)
 
@@ -16,32 +20,28 @@ func main() {
 			return err
 		}
 
-		// Load Distribution config
-		var distConfig = CreateDistributionConfig(ctx)
-
 		// Create a cloudfront distribution to serve the content from the bucket.
 		distribution, err := CreateDistribution(ctx, "poc", &CreateDistributionArgs{
-			BucketName:               bucketName,
-			BucketRegionalDomainName: bucketContent.BucketRegionalDomainName,
-			DistributionConfig:       distConfig,
+			Bucket:     bucketContent,
+			BucketName: bucketName,
 		})
 		if err != nil {
 			return err
 		}
 
-		if distConfig.Aliases != nil && len(distConfig.Aliases) > 0 {
-			for _, alias := range distConfig.Aliases {
+		if len(domains) > 0 {
+			for _, domain := range domains {
 				// Create a record to point to the cloudfront distribution.
-				hostedZone, err := LookupHostedZone(ctx, extractDomain(alias))
+				hostedZone, err := LookupHostedZone(ctx, extractDomain(domain))
 				if err != nil {
 					return err
 				}
 				_, err = CreateRecord(ctx, "poc", CreateRecordArgs{
 					HostedZoneId:                     hostedZone.ZoneId,
-					DnsName:                          alias,
+					DnsName:                          domain,
 					DistributionHostedZoneDomainName: distribution.DomainName,
 					DistributionHostedZoneId:         distribution.HostedZoneId,
-				})
+				}, pulumi.DependsOn([]pulumi.Resource{distribution}))
 				if err != nil {
 					return err
 				}

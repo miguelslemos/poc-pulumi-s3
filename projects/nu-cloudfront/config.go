@@ -34,10 +34,10 @@ type NuDistributionArgs struct {
 	DistributionArgs             cloudfront.DistributionArgs
 }
 
-func CreateDistributionConfig(ctx *pulumi.Context) NuDistributionArgs {
+func CreateDistributionConfig(ctx *pulumi.Context, additionalOrigin []cloudfront.DistributionOriginInput) NuDistributionArgs {
+
 	var distributionArgs NuDistributionArgs
 	config.RequireObject(ctx, Distribution, &distributionArgs)
-
 	dist := cloudfront.DistributionArgs{
 		Enabled: pulumi.Bool(distributionArgs.Enabled),
 	}
@@ -56,11 +56,11 @@ func CreateDistributionConfig(ctx *pulumi.Context) NuDistributionArgs {
 	setBoolPtrFromPtr(&dist.WaitForDeployment, distributionArgs.WaitForDeployment)
 	setStringPtrFromPtr(&dist.WebAclId, distributionArgs.WebAclId)
 
-	setDefaultCacheBehavior(&dist, distributionArgs.DefaultCacheBehavior)
+	setOrigins(&dist, distributionArgs.Origins, additionalOrigin)
+	setDefaultCacheBehavior(&dist, distributionArgs.DefaultCacheBehavior, additionalOrigin)
 	setViewerCertificate(&dist, distributionArgs.ViewerCertificate)
 	setGeoRestriction(&dist, distributionArgs.Restrictions.GeoRestriction)
 	setCustomErrorResponses(&dist, distributionArgs.CustomErrorResponses)
-	setOrigins(&dist, distributionArgs.Origins)
 	setOriginGroups(&dist, distributionArgs.OriginGroups)
 	setOrderedCacheBehaviors(&dist, distributionArgs.OrderedCacheBehaviors)
 
@@ -86,10 +86,15 @@ func setLoggingConfig(dist *cloudfront.DistributionArgs, loggingConfig *cloudfro
 	}
 }
 
-func setDefaultCacheBehavior(dist *cloudfront.DistributionArgs, defaultCacheBehavior cloudfront.DistributionDefaultCacheBehavior) {
+func setDefaultCacheBehavior(dist *cloudfront.DistributionArgs, defaultCacheBehavior cloudfront.DistributionDefaultCacheBehavior, additionalOrigin []cloudfront.DistributionOriginInput) {
+
 	cacheBehavior := cloudfront.DistributionDefaultCacheBehaviorArgs{
 		ViewerProtocolPolicy: pulumi.String(defaultCacheBehavior.ViewerProtocolPolicy),
-		TargetOriginId:       pulumi.String("bucket-origin"),
+		TargetOriginId:       pulumi.String(defaultCacheBehavior.TargetOriginId),
+	}
+
+	if additionalOrigin != nil && len(additionalOrigin) > 0 {
+		cacheBehavior.TargetOriginId = additionalOrigin[0].ToDistributionOriginOutput().OriginId().ToStringOutput()
 	}
 	setStringArrayFrom(&cacheBehavior.AllowedMethods, defaultCacheBehavior.AllowedMethods)
 	setStringArrayFrom(&cacheBehavior.CachedMethods, defaultCacheBehavior.CachedMethods)
@@ -163,16 +168,18 @@ func setCustomErrorResponses(dist *cloudfront.DistributionArgs, customErrorRespo
 	dist.CustomErrorResponses = cloudfront.DistributionCustomErrorResponseArray(responses)
 }
 
-func setOrigins(dist *cloudfront.DistributionArgs, origins []cloudfront.DistributionOrigin) {
-	if origins == nil {
+func setOrigins(dist *cloudfront.DistributionArgs, origins []cloudfront.DistributionOrigin, additionalOrigin []cloudfront.DistributionOriginInput) {
+	if origins == nil && additionalOrigin == nil {
 		return
 	}
 
-	originArray := make([]cloudfront.DistributionOriginInput, len(origins))
-	for i, origin := range origins {
+	allOrigins := make([]cloudfront.DistributionOriginInput, 0)
+	for _, origin := range origins {
 		originArgs := cloudfront.DistributionOriginArgs{
-			DomainName: pulumi.String(origin.DomainName),
-			OriginId:   pulumi.String("bucket-origin"),
+			DomainName:         pulumi.String(origin.DomainName),
+			OriginId:           pulumi.String(origin.OriginId),
+			ConnectionAttempts: pulumi.IntPtrFromPtr(origin.ConnectionAttempts),
+			ConnectionTimeout:  pulumi.IntPtrFromPtr(origin.ConnectionTimeout),
 		}
 		setStringPtrFromPtr(&originArgs.OriginAccessControlId, origin.OriginAccessControlId)
 		setStringPtrFromPtr(&originArgs.OriginPath, origin.OriginPath)
@@ -189,17 +196,15 @@ func setOrigins(dist *cloudfront.DistributionArgs, origins []cloudfront.Distribu
 			originArgs.CustomOriginConfig = cloudfront.DistributionOriginCustomOriginConfigPtr(&config)
 		}
 
-		// if origin.S3OriginConfig != nil {
-		// 	config := cloudfront.DistributionOriginS3OriginConfigArgs{
-		// 		OriginAccessIdentity: pulumi.String(origin.S3OriginConfig.OriginAccessIdentity),
-		// 	}
-		// 	originArgs.S3OriginConfig = cloudfront.DistributionOriginS3OriginConfigPtr(&config)
-		// }
-
-		originArray[i] = originArgs
+		allOrigins = append(allOrigins, originArgs)
 	}
 
-	dist.Origins = cloudfront.DistributionOriginArray(originArray)
+	if additionalOrigin != nil {
+		allOrigins = append(allOrigins, additionalOrigin...)
+	}
+
+	dist.Origins = cloudfront.DistributionOriginArray(allOrigins)
+
 }
 
 func setOriginGroups(dist *cloudfront.DistributionArgs, originGroups []cloudfront.DistributionOriginGroup) {
