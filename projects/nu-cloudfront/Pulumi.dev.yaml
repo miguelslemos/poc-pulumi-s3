@@ -6,8 +6,6 @@ config:
   nu-cloudfront:domains:
     - poc-cloudfront-static-4213.nubankdev.com
   nu-cloudfront:distribution:
-    aliases:
-      - poc-cloudfront-static-4213.nubankdev.com
     comment: POC CloudFront Pulumi
     defaultRootObject: index.html
     defaultCacheBehavior:
@@ -31,4 +29,4 @@ config:
     viewerCertificate:
       minimumProtocolVersion: TLSv1.2_2021
       sslSupportMethod: sni-only
-      acmCertificateArn: TODO
+

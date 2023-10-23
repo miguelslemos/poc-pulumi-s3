@@ -93,7 +93,7 @@ func setDefaultCacheBehavior(dist *cloudfront.DistributionArgs, defaultCacheBeha
 		TargetOriginId:       pulumi.String(defaultCacheBehavior.TargetOriginId),
 	}
 
-	if additionalOrigin != nil && len(additionalOrigin) > 0 {
+	if len(additionalOrigin) > 0 {
 		cacheBehavior.TargetOriginId = additionalOrigin[0].ToDistributionOriginOutput().OriginId().ToStringOutput()
 	}
 	setStringArrayFrom(&cacheBehavior.AllowedMethods, defaultCacheBehavior.AllowedMethods)
