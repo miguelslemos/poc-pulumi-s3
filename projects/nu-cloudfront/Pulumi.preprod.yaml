@@ -2,6 +2,8 @@ encryptionsalt: v1:R6lJmR1ELmI=:v1:DKsiXqL4RWE9CMiw:ZLyROWvWTsyFHLTnj6NPgIjXGElP
 config:
   aws:region: us-east-1
   nu-cloudfront:bucketName: poc-cloudfront-static-4213
+  nu-cloudfront:domains:
+    - poc-cloudfront-static-4213.nubankdev.com
   nu-cloudfront:distribution:
     comment: POC CloudFront Pulumi
     defaultRootObject: index.html
