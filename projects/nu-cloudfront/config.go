@@ -1,6 +1,10 @@
 package main
 
 import (
+	b64 "encoding/base64"
+	"encoding/json"
+	"fmt"
+
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cloudfront"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
@@ -34,10 +38,39 @@ type NuDistributionArgs struct {
 	DistributionArgs             cloudfront.DistributionArgs
 }
 
+func decodeConfig(encodedJson string, distributionArgs *NuDistributionArgs) error {
+	bytes, err := b64.StdEncoding.DecodeString(encodedJson)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(bytes, &distributionArgs)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func readConfig(ctx *pulumi.Context) NuDistributionArgs {
+	var distributionArgs NuDistributionArgs
+	configData, err := config.Try(ctx, "configData")
+	if err == nil {
+		fmt.Println("configData found")
+		err := decodeConfig(configData, &distributionArgs)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		fmt.Println("configData not found")
+		config.RequireObject(ctx, Distribution, &distributionArgs)
+	}
+	return distributionArgs
+}
+
 func CreateDistributionConfig(ctx *pulumi.Context, additionalOrigin []cloudfront.DistributionOriginInput) NuDistributionArgs {
 
-	var distributionArgs NuDistributionArgs
-	config.RequireObject(ctx, Distribution, &distributionArgs)
+	distributionArgs := readConfig(ctx)
 	dist := cloudfront.DistributionArgs{
 		Enabled: pulumi.Bool(distributionArgs.Enabled),
 	}
