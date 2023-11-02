@@ -5,6 +5,7 @@ use (
 	./projects/adhoc-buckets
 	./projects/create-bucket
 	./projects/nu-cloudfront
+	./projects/nu-create-bucket
 	./provider
 	./sdk
 )

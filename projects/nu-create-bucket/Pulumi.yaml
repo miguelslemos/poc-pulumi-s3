@@ -1,0 +1,3 @@
+name: nu-create-bucket
+runtime: go
+description: A minimal AWS Go Pulumi program to create S3 buckets
