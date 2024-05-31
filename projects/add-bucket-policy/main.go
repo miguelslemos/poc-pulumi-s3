@@ -9,7 +9,7 @@ import (
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
 		conf := config.New(ctx, "")
-		bucketName := conf.Require("bucket-name")
+		bucketName := conf.Require("bucketName")
 		if _, err := s3.NewBucketPolicy(ctx, "bucketPolicy", &s3.BucketPolicyArgs{
 			Bucket: pulumi.String(bucketName),
 			Policy: pulumi.Any(map[string]interface{}{
