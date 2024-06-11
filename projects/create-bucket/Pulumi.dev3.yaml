@@ -1,4 +1,5 @@
 encryptionsalt: v1:t7/jw9Qonyc=:v1:meF7Xbq75KOZnKdr:g4o/y+mX4tuAq6wp0AH9fuQsQrOz5Q==
 config:
+  aws:assumeRole:
+    roleArn: arn:aws:iam::533267309164:role/staging/pulumi-infra-mgmt-test-create-bucket/pink/staging-pink-pulumi-infra-mgmt-test-create-bucket
   aws-native:region: us-east-1
-  bucket-name: "my-local-bucket-pulumi"
